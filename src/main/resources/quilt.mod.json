@@ -16,6 +16,9 @@
 			"icon": "assets/example_mod/icon.png"
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
+		"entrypoints": {
+			"init": "net.ramixin.mixson.Mixson"
+		},
 		"depends": [
 			{
 				"id": "quilt_loader",

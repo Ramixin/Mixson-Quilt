@@ -42,6 +42,8 @@ dependencies {
 	}
 	modImplementation libs.quilt.loader
 
+	modImplementation libs.quilted.fabric.api
+
 }
 
 processResources {
