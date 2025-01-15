@@ -4,14 +4,15 @@ package net.ramixin.mixson;
 import com.google.gson.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import net.ramixin.mixson.atp.MixsonAnnotationProcessor;
 import net.ramixin.mixson.debug.CallCountEntry;
 import net.ramixin.mixson.debug.DebugMode;
 import net.ramixin.mixson.debug.MixsonCommand;
 import net.ramixin.mixson.events.*;
 import org.apache.commons.io.FileUtils;
+import org.quiltmc.loader.api.LoaderValue;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.loader.api.QuiltLoader;
-import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
-public final class Mixson implements ModInitializer {
+public final class Mixson implements MixsonInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("Mixson");
     private static DebugMode debugMode = DebugMode.OFF;
@@ -368,9 +369,24 @@ public final class Mixson implements ModInitializer {
     // DEV COMMAND
 
     @Override
-    public void onInitialize(ModContainer mod) {
-        if(!QuiltLoader.isDevelopmentEnvironment()) return;
-		QuiltLoader.getAllMods().forEach(m -> LOGGER.info(m.metadata().id()));
+    public void onInitialize(ModContainer unused) {
+		for(ModContainer mod : QuiltLoader.getAllMods()) {
+			String id = mod.metadata().id();
+			LoaderValue mixson = mod.metadata().value("mixson");
+			if(mixson == null) continue;
+			if(!(mixson instanceof LoaderValue.LArray array)) throw new MixsonError(String.format("'mixson' field in mod '%s' is not of type array", id));
+			for(LoaderValue entry : array) {
+				if(entry.type() != LoaderValue.LType.STRING) throw new MixsonError(String.format("'mixson' field in mod '%s' contains non-string value '%s'", id, entry));
+				String className = entry.asString();
+				try {
+					MixsonAnnotationProcessor.processClass(Class.forName(className), Mixson::logAction);
+				} catch (ClassNotFoundException e) {
+					throw new MixsonError(String.format("class '%s' in 'mixson' field in mod '%s' does not exist", className, id));
+				}
+			}
+		}
+
+		if(!QuiltLoader.isDevelopmentEnvironment()) return;
         if(!QuiltLoader.isModLoaded("quilt_command")) return;
         MixsonCommand.onInitialize();
     }
