@@ -17,7 +17,7 @@
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
-			"mixson": "net.ramixin.mixson.Mixson"
+			"mixson": "net.ramixin.mixson.inline.Mixson"
 		},
 		"depends": [
 			{
