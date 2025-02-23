@@ -23,7 +23,7 @@ public class BuiltResourceReference<T> implements ErrorMessageProvider {
     protected BuiltResourceReference(ResourceReference reference, MixsonCodec<T> codec) {
         if(reference.ordinal() == -1) throw new IllegalArgumentException(String.format("Ordinal for resource reference: %s cannot be -1", reference.referenceId()));
         if(reference.ordinal() < 0) throw new IllegalArgumentException(String.format("Ordinal for resource reference: %s cannot be negative", reference.referenceId()));
-        this.resourceId = new ResourceLocation(reference.resourceId()).withSuffix(".json");
+        this.resourceId = new ResourceLocation(reference.resourceId()).withSuffix(codec.extensionAndDot());
         this.referenceId = new ResourceLocation(reference.referenceId());
         this.ordinal = reference.ordinal();
         this.codec = codec;
